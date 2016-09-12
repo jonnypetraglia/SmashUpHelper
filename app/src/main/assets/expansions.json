@@ -1,0 +1,68 @@
+{
+  "Core": [
+    "Aliens",
+    "Dinosaurs",
+    "Ninjas",
+    "Pirates",
+    "Robots",
+    "Tricksters",
+    "Wizards",
+    "Zombies"
+  ],
+  "Awesome Level 9000": [
+    "Bear Cavalry",
+    "Ghosts",
+    "Killer Plants",
+    "Steampunks"
+  ],
+  "The Obligatory Cthulu Set": [
+    "Elder Things",
+    "Innsmouth",
+    "Minions of Cthulu",
+    "Miskatonic University"
+  ],
+  "Science Fiction Double Feature": [
+    "Cyborg Apes",
+    "Shapeshifters",
+    "Super Spies",
+    "Time Travelers"
+  ],
+  "The Big Geeky Box": [
+    "Geeks"
+  ],
+  "Monster Smash": [
+    "Giant Ants",
+    "Mad Scientists",
+    "Vampires",
+    "Werewolves"
+  ],
+  "Pretty Pretty Smash Up": [
+    "Fairies",
+    "Kitty Cats",
+    "Mythic Horses",
+    "Princesses"
+  ],
+  "Munchkin": [
+    "Clerics",
+    "Dwarves",
+    "Elves",
+    "Halflings",
+    "Mages",
+    "Orcs",
+    "Thieves",
+    "Warriors"
+  ],
+  "It's Your Fault": [
+    "Dragons",
+    "Mythic Greeks",
+    "Sharks",
+    "Superheroes",
+    "Tornados"
+  ],
+  "Cease and Desist": [
+    "Changerbots",
+    "Star Roamers",
+    "Astro Knights",
+    "Ignobles"
+  ]
+}
