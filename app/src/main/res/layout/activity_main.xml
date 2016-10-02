@@ -77,7 +77,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="26dp"
         android:layout_below="@+id/mulligans2"
-        android:id="@+id/type_group">
+        android:id="@+id/method_group">
 
         <RadioButton
             android:layout_width="wrap_content"

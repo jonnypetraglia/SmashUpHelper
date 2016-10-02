@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical" android:layout_width="match_parent"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:id="@+id/random_layout">
 
@@ -10,31 +12,43 @@
         android:text="Draw"
         android:id="@+id/draw"
         android:layout_centerVertical="true"
-        android:layout_centerHorizontal="true" />
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textAppearance="?android:attr/textAppearanceLarge"
-        android:id="@+id/faction"
-        android:layout_above="@+id/draw"
-        android:layout_centerHorizontal="true" />
-
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Mulligan"
-        android:id="@+id/use_mulligan"
-        android:layout_below="@+id/draw"
         android:layout_centerHorizontal="true"
-        android:visibility="gone" />
+        android:textSize="35sp"
+        android:padding="20dp" />
 
     <TextView
+        tools:text="Faction Name"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceLarge"
+        android:id="@+id/faction"
+        android:textSize="40sp"
+        android:layout_alignParentTop="true"
+        android:layout_above="@+id/draw"
+        android:gravity="center" />
+
+    <Button
+        android:text="Mulligan"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/use_mulligan"
+        android:visibility="invisible"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentLeft="false"
+        android:layout_alignParentRight="false"
+        android:gravity="center"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="10dp" />
+
+    <TextView
+        tools:text="Other Faction"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
         android:id="@+id/other"
         android:layout_alignParentTop="true"
-        android:layout_toRightOf="@+id/use_mulligan"
-        android:layout_toEndOf="@+id/use_mulligan" />
+        android:textSize="20sp"
+        android:layout_alignParentLeft="false"
+        android:padding="10dp"
+        android:background="#333"
+        android:textColor="#fff" />
 </RelativeLayout>

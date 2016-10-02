@@ -12,7 +12,6 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -23,66 +22,41 @@ import java.util.Iterator;
 
 
 /*
-    - "Change Factions" button
-    - # of people
-    - # Mulligans
-      - display a line for each random; so "(1st) Mulligans: 1", "2nd Mulligans: 0"
-    - Type
-      - 1 random 1 random
-      - 1 random 1 random
-      - 2 randoms
-      - 2 picks
+TODO:
+  - Settings
+    - Taboos? (e.g. no zombots)
+      - "randomly" or "ever"
+    - more methods
       - 2 out of 3
         - Mulligan reshuffles all 3?
       - Snake (randomly select enough for everyone; go round)
-    - Secret? (don't show what other people have picked)
  */
 
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements RadioGroup.OnCheckedChangeListener, SeekBar.OnSeekBarChangeListener {
     ArrayList<Expansion> expansions = new ArrayList<>();
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        Persistable.init(getApplicationContext());
+
         try {
             loadJSONFromAsset();
             setContentView(R.layout.activity_main);
-            findViewById(R.id.go).setOnClickListener(startSelection);
-            ((SeekBar)findViewById(R.id.playersSeek)).setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-                @Override
-                public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                    ((TextView)findViewById(R.id.players)).setText(Integer.toString(seekBar.getProgress()+2));
-                }
 
-                @Override public void onStartTrackingTouch(SeekBar seekBar) {}
-                @Override public void onStopTrackingTouch(SeekBar seekBar) {}
-            });
+            findViewById(R.id.factions).setOnClickListener(setFactions);
+            findViewById(R.id.go).setOnClickListener(startSelection);
+
+            RadioGroup methods = ((RadioGroup)findViewById(R.id.method_group));
+            methods.setOnCheckedChangeListener(this);
+            this.onCheckedChanged(methods, methods.getCheckedRadioButtonId());
+
+            ((SeekBar)findViewById(R.id.playersSeek)).setOnSeekBarChangeListener(this);
         } catch (Exception e) {
             e.printStackTrace();
             Toast.makeText(this, "Error occured: " + e.getMessage(), Toast.LENGTH_LONG).show();
             finish();
-        }
-    }
-
-    class Expansion {
-        public String name;
-        public String[] factions;
-        public boolean disabled;
-
-        public Expansion(String key, JSONArray jsonArray) throws JSONException {
-            name = key;
-            factions = new String[jsonArray.length()];
-            for(int i=0; i<jsonArray.length(); i++)
-                factions[i] = jsonArray.getString(i);
-        }
-        public Expansion(String key, JSONArray jsonArray, boolean disabled) throws JSONException {
-            this(key, jsonArray);
-            setDisabled(disabled);
-        }
-
-        public void setDisabled(boolean d) {
-            disabled = d;
         }
     }
 
@@ -93,15 +67,25 @@ public class MainActivity extends AppCompatActivity {
             ArrayList<String> factions = new ArrayList<>();
             Intent intent = new Intent(MainActivity.this, Selecting.class);
             for(Expansion exp : expansions)
-                if(!exp.disabled)
-                    for(String fac : exp.factions)
-                        factions.add(fac);
+                if(!exp.isDisabled())
+                    for(Faction fac : exp.factions)
+                        if(!fac.isDisabled())
+                            factions.add(fac.name);
             intent.putExtra("factions", factions);
             intent.putExtra("players", ((SeekBar)findViewById(R.id.playersSeek)).getProgress()+2);
             intent.putExtra("mulligans1", Integer.parseInt(((EditText)findViewById(R.id.mulligans1)).getText().toString()));
             intent.putExtra("mulligans2", Integer.parseInt(((EditText)findViewById(R.id.mulligans2)).getText().toString()));
-            intent.putExtra("type_id", ((RadioGroup)findViewById(R.id.type_group)).getCheckedRadioButtonId());
+            intent.putExtra("method_id", ((RadioGroup)findViewById(R.id.method_group)).getCheckedRadioButtonId());
 
+            startActivity(intent);
+        }
+    };
+
+    View.OnClickListener setFactions = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            Intent intent = new Intent(MainActivity.this, ChangeFactions.class);
+            intent.putExtra("expansions", expansions);
             startActivity(intent);
         }
     };
@@ -121,4 +105,28 @@ public class MainActivity extends AppCompatActivity {
             expansions.add(exp);
         }
     }
+
+    @Override
+    public void onCheckedChanged(RadioGroup group, int checkedId) {
+        findViewById(R.id.mulligans1).setVisibility(
+                (checkedId == R.id.random_pick || checkedId == R.id.random_random)
+                ? View.VISIBLE : View.INVISIBLE
+        );
+        findViewById(R.id.mulligans2).setVisibility(
+                (checkedId == R.id.pick_random || checkedId == R.id.random_random)
+                ? View.VISIBLE : View.INVISIBLE
+        );
+        findViewById(R.id.mulligansText).setVisibility(
+                (checkedId == R.id.random_pick || checkedId == R.id.pick_random || checkedId == R.id.random_random)
+                ? View.VISIBLE : View.INVISIBLE
+        );
+    }
+
+    @Override
+    public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+        ((TextView)findViewById(R.id.players)).setText(Integer.toString(seekBar.getProgress()+2));
+    }
+
+    @Override public void onStartTrackingTouch(SeekBar seekBar) {}
+    @Override public void onStopTrackingTouch(SeekBar seekBar) {}
 }

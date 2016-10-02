@@ -1,15 +1,16 @@
 package com.qweex.smashuphelper;
 
-import android.animation.Animator;
 import android.annotation.TargetApi;
-import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
-import android.support.v7.app.AlertDialog;
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
-import android.view.animation.Animation;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -18,38 +19,37 @@ import android.widget.TextView;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Random;
 
-/*
 
-    - Random: "Press to draw"
-      - If mulligan, display "Use Mulligan (# left)"
-    - Pick: scroll through list
+/* TODO:
+    - UNDO
+      - If
  */
+
 public class Selecting extends AppCompatActivity {
     Player[] players;
     ListView pickListview;
     TextView otherPick;
     ArrayAdapter<String> factionAdapter;
-    int selectType;
+    int selectMethod;
     int iter = -1;
     Random randomGenerator = new Random();
-    int chosenFaction;
-
-    int[] SelectIDs = new int[] {
-            R.id.pick_random,
-            R.id.random_pick,
-            R.id.pick_pick,
-            R.id.random_random
-    };
+    final static int FORCE_MULLIGAN = 1, FORCE_PICK = 2, UNDO = 3;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        selectType = getIntent().getIntExtra("type_id", -1);
-        players = new Player[ getIntent().getIntExtra("players", -1) ];
+        Bundle extras = getIntent().getExtras();
+        selectMethod = extras.getInt("method_id", -1);
+        players = new Player[ extras.getInt("players", -1) ];
         for(int i=0; i<players.length; i++)
-            players[i] = new Player( getIntent().getIntExtra("mulligans1", 0), getIntent().getIntExtra("mulligans2", 0) );
+            players[i] = new Player(
+                    String.format("Player %d", i+1),
+                    extras.getInt("mulligans1", 0),
+                    extras.getInt("mulligans2", 0)
+            );
 
         ArrayList<String> factions = getIntent().getStringArrayListExtra("factions");
         Collections.sort(factions);
@@ -67,15 +67,57 @@ public class Selecting extends AppCompatActivity {
         next();
     }
 
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        menu.add(Menu.NONE, FORCE_MULLIGAN, Menu.NONE, "Legit need to random")
+                .setShowAsAction(MenuItem.SHOW_AS_ACTION_NEVER);
+        menu.add(Menu.NONE, FORCE_PICK, Menu.NONE, "Legit need to pick")
+                .setShowAsAction(MenuItem.SHOW_AS_ACTION_NEVER);
+        menu.add(Menu.NONE, UNDO, Menu.NONE, "Undo last select")
+                .setShowAsAction(MenuItem.SHOW_AS_ACTION_NEVER);
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch(item.getItemId()) {
+            case FORCE_MULLIGAN:
+                doRandom();
+                break;
+            case FORCE_PICK:
+                doPick();
+                break;
+            case UNDO:
+                if(iter==0)
+                    break;
+                --iter;
+                String lastChoice = players[iter % players.length].factions[iter / players.length];
+                Log.d("last", "Player " + (iter % players.length) + " faction " + (iter / players.length) + "!");
+                factionAdapter.add(lastChoice);
+                factionAdapter.sort(new Comparator<String>() {
+                    @Override
+                    public int compare(String o1, String o2) {
+                        return o1.compareTo(o2);
+                    }
+                });
+                --iter;
+                next();
+                break;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
     void next() {
         ++iter;
         if(iter >= players.length * 2) {
             done();
             return;
         }
-        setTitle("Player " + ((iter % players.length)+1) + " Faction " + ((iter / players.length)+1) );
+        setTitle(
+                String.format("%s - Faction %d", players[iter % players.length].name, ((iter / players.length)+1))
+        );
         if(iter >= players.length) {
-            switch(selectType) {
+            switch(selectMethod) {
                 case R.id.pick_random:
                 case R.id.random_random:
                     doRandom();
@@ -86,7 +128,7 @@ public class Selecting extends AppCompatActivity {
                     break;
             }
         } else {
-            switch(selectType) {
+            switch(selectMethod) {
                 case R.id.random_pick:
                 case R.id.random_random:
                     doRandom();
@@ -100,16 +142,15 @@ public class Selecting extends AppCompatActivity {
     }
 
     @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
-    void fadeIn(final View v) {
-//        v.setAlpha(0.0f);
-        v.animate()
+    void fadeIn(final View viewToFade) {
+        viewToFade.animate()
                 .alpha(0.0f)
                 .x(getWindowManager().getDefaultDisplay().getWidth() / 2)
                 .setDuration(0)
                 .withEndAction(new Runnable() {
                     @Override
                     public void run() {
-                        v.animate()
+                        viewToFade.animate()
                                 .alpha(1.0f)
                                 .x(0)
                                 .setDuration(getResources().getInteger(android.R.integer.config_longAnimTime))
@@ -124,7 +165,9 @@ public class Selecting extends AppCompatActivity {
 
         TextView otherPick = (TextView) findViewById(R.id.other);
         otherPick.setVisibility(iter >= players.length ? View.VISIBLE : View.GONE);
-        otherPick.setText(players[iter % players.length].factions[0]);
+        otherPick.setText(
+                String.format("%s and:", players[iter % players.length].factions[0])
+        );
         fadeIn(findViewById(R.id.random_layout));
     }
 
@@ -139,7 +182,9 @@ public class Selecting extends AppCompatActivity {
                 findViewById(R.id.use_mulligan).setVisibility(View.GONE);
             } else {
                 findViewById(R.id.use_mulligan).setVisibility(View.VISIBLE);
-                ((TextView)findViewById(R.id.use_mulligan)).setText("Mulligan (" + mulliganCt + ")");
+                ((TextView)findViewById(R.id.use_mulligan)).setText(
+                        String.format("Mulligan (%d)", mulliganCt)
+                );
             }
             findViewById(R.id.use_mulligan).setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -169,31 +214,59 @@ public class Selecting extends AppCompatActivity {
         setContentView(pickListview);
 
         otherPick.setVisibility(iter >= players.length ? View.VISIBLE : View.GONE);
-        otherPick.setText(players[iter % players.length].factions[0]);
+        otherPick.setText(
+                String.format("%s and:", players[iter % players.length].factions[0])
+        );
         fadeIn(pickListview);
     }
 
     void done() {
         //TODO
-        StringBuilder sb = new StringBuilder();
-        for(int i=0; i<players.length; i++)
-            sb.append("Player ").append(i).append(": ").append(players[i].factions[0]).append(" & ").append(players[i].factions[1]).append("\n");
-        new AlertDialog.Builder(this)
-                .setMessage(sb.toString())
-                .setOnDismissListener(new DialogInterface.OnDismissListener() {
-                    @Override
-                    public void onDismiss(DialogInterface dialog) {
-                        finish();
-                    }
-                })
-                .show();
+
+        Intent intent = new Intent(this, Summary.class);
+        intent.putExtra("players", players);
+        startActivity(intent);
+        finish();
     }
 
-    class Player {
+    public static class Player implements Parcelable {
+        String name;
         String[] factions = new String[2];
         int[] mulligans;
-        public Player(int m1, int m2) {
+
+        public Player(String n, int m1, int m2) {
+            name = n;
             mulligans = new int[] {m1, m2};
         }
+
+        protected Player(Parcel in) {
+            name = in.readString();
+            factions = in.createStringArray();
+            mulligans = in.createIntArray();
+        }
+
+        @Override
+        public int describeContents() {
+            return 0;
+        }
+
+        @Override
+        public void writeToParcel(Parcel dest, int flags) {
+            dest.writeString(name);
+            dest.writeStringArray(factions);
+            dest.writeIntArray(mulligans);
+        }
+
+        public static Creator<Player> CREATOR = new Creator<Player>() {
+            @Override
+            public Player createFromParcel(Parcel in) {
+                return new Player(in);
+            }
+
+            @Override
+            public Player[] newArray(int size) {
+                return new Player[size];
+            }
+        };
     }
 }

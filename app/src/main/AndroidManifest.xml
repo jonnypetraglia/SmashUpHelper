@@ -16,7 +16,8 @@
             </intent-filter>
         </activity>
         <activity android:name=".Selecting" />
-        <activity android:name=".Factions" />
+        <activity android:name=".ChangeFactions" />
+        <activity android:name=".Summary" />
     </application>
 
 </manifest>
