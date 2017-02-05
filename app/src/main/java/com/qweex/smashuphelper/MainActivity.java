@@ -86,9 +86,17 @@ public class MainActivity extends AppCompatActivity implements RadioGroup.OnChec
         public void onClick(View v) {
             Intent intent = new Intent(MainActivity.this, ChangeFactions.class);
             intent.putExtra("expansions", expansions);
-            startActivity(intent);
+            startActivityForResult(intent, 100);
         }
     };
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if(requestCode==100) {
+            expansions = data.getParcelableArrayListExtra("expansions");
+        }
+    }
 
     public void loadJSONFromAsset() throws IOException, JSONException {
         InputStream is = getAssets().open("expansions.json");

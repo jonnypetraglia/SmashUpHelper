@@ -15,23 +15,27 @@ public class Persistable implements Serializable, Parcelable {
     final static private String PREF_NAME = "persistent";
     private static SharedPreferences prefs;
 
+    private String prefKey() {
+        return String.format("%s[%s]", getClass().getName(), name);
+    }
+
     Persistable(String key) {
         name = key;
-        disabled = prefs.getBoolean(String.format("%s[%s]", getClass().getName(), name), true);
+        disabled = prefs.getBoolean(prefKey(), false);
         Log.d("Persistable", key + " " + disabled);
     }
 
     Persistable(Parcel src) {
         this(src.readString());
-        setDisabled(src.readByte() != 0);
+        byte x = src.readByte();
+        Log.d("Persistparcle", name + "=" + x);
+        setDisabled(x != 0);
     }
 
     public void setDisabled(boolean d) {
         disabled = d;
-        prefs.edit().putBoolean(
-                String.format("%s[%s]", getClass().getName(), name),
-                disabled
-        ).apply();
+        Log.d("Persisting", prefKey() + " = " + d);
+        prefs.edit().putBoolean(prefKey(), disabled).apply();
     }
 
     public boolean isDisabled() {
@@ -45,8 +49,9 @@ public class Persistable implements Serializable, Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
+        Log.d("PersistparcleW", name + "=" + disabled);
         dest.writeString(name);
-        dest.writeByte((byte) (isDisabled() ? 1 : 0));
+        dest.writeByte((byte) (disabled ? 1 : 0));
     }
 
 

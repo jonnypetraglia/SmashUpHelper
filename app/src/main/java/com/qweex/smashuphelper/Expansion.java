@@ -2,6 +2,7 @@ package com.qweex.smashuphelper;
 
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.util.Log;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -17,6 +18,7 @@ public class Expansion extends Persistable {
         factions = new Faction[jsonArray.length()];
         for (int i = 0; i < jsonArray.length(); i++)
             factions[i] = new Faction(jsonArray.getString(i));
+        Log.d("New Expansion", key + " = " + isDisabled());
     }
 
     public Expansion(String key, JSONArray jsonArray, boolean disabled) throws JSONException {

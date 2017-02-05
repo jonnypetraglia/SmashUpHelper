@@ -1,7 +1,9 @@
 package com.qweex.smashuphelper;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseExpandableListAdapter;
@@ -37,6 +39,9 @@ public class ChangeFactions extends AppCompatActivity  {
         public ExpansionExpandableAdapter(ArrayList<Expansion> expansions) {
             super();
             this.expansions = expansions;
+            Intent i = new Intent();
+            i.putExtra("expansions", expansions);
+            setResult(RESULT_OK, i);
         }
 
         @Override
@@ -87,6 +92,7 @@ public class ChangeFactions extends AppCompatActivity  {
 
 
             CheckBox check = (CheckBox)convertView.findViewById(android.R.id.checkbox);;
+            Log.d("getGroupView", !getGroup(groupPosition).isDisabled() + " " + getGroup(groupPosition).name);
             check.setChecked(!getGroup(groupPosition).isDisabled());
             check.setText(getGroup(groupPosition).name);
             return convertView;
@@ -110,6 +116,7 @@ public class ChangeFactions extends AppCompatActivity  {
 
         @Override
         public boolean onGroupClick(ExpandableListView parent, View v, int groupPosition, long id) {
+            Log.d("ChangeFactions", "onGroupClick");
             getGroup(groupPosition).setDisabled(!getGroup(groupPosition).isDisabled());
             if(!getGroup(groupPosition).isDisabled()) {
                 if (!parent.isGroupExpanded(groupPosition))
@@ -125,6 +132,7 @@ public class ChangeFactions extends AppCompatActivity  {
 
         @Override
         public boolean onChildClick(ExpandableListView parent, View v, int groupPosition, int childPosition, long id) {
+            Log.d("ChangeFactions", "onChildClick");
             getChild(groupPosition, childPosition).setDisabled(!getChild(groupPosition, childPosition).isDisabled());
 
             CheckBox check = (CheckBox)v.findViewById(android.R.id.checkbox);
