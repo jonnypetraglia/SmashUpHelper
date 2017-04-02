@@ -35,7 +35,7 @@ public class Selecting extends AppCompatActivity {
     ArrayAdapter<String> factionAdapter;
     int selectMethod;
     int iter = -1;
-    Random randomGenerator = new Random();
+    Random randomGenerator = new Random(System.currentTimeMillis());
     final static int FORCE_MULLIGAN = 1, FORCE_PICK = 2, UNDO = 3;
 
     @Override
