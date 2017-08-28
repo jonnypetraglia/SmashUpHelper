@@ -74,6 +74,14 @@ public class MainActivity extends AppCompatActivity implements RadioGroup.OnChec
 
         Persistable.init(getApplicationContext());
 
+
+        setContentView(R.layout.activity_main);
+
+        playersSeek = (SeekBar)findViewById(R.id.playersSeek);
+        mulligans1 = (EditText)findViewById(R.id.mulligans1);
+        mulligans2 = (EditText)findViewById(R.id.mulligans2);
+        methodGroup = ((RadioGroup)findViewById(R.id.method_group));
+
         if(savedInstanceState!=null)
             restoreConfig(savedInstanceState);
         else {
@@ -85,13 +93,6 @@ public class MainActivity extends AppCompatActivity implements RadioGroup.OnChec
                 finish();
             }
         }
-
-        setContentView(R.layout.activity_main);
-
-        playersSeek = (SeekBar)findViewById(R.id.playersSeek);
-        mulligans1 = (EditText)findViewById(R.id.mulligans1);
-        mulligans2 = (EditText)findViewById(R.id.mulligans2);
-        methodGroup = ((RadioGroup)findViewById(R.id.method_group));
 
 
         findViewById(R.id.factions).setOnClickListener(setFactions);
