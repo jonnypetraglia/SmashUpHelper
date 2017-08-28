@@ -1,10 +1,10 @@
-package com.qweex.smashuphelper;
+package com.qweex.smashuphelper.activities;
 
 import android.annotation.TargetApi;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Parcel;
 import android.os.Parcelable;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -16,6 +16,10 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
+
+import com.qweex.smashuphelper.R;
+import com.qweex.smashuphelper.objects.Player;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -30,30 +34,57 @@ import java.util.Random;
 
 public class Selecting extends AppCompatActivity {
     Player[] players;
-    ListView pickListview;
-    TextView otherPick;
-    ArrayAdapter<String> factionAdapter;
     int selectMethod;
     int iter = -1;
+    FactionAdapter factionAdapter;
+
+    ListView pickListview;
+    TextView otherPick;
     Random randomGenerator = new Random(System.currentTimeMillis());
     final static int FORCE_MULLIGAN = 1, FORCE_PICK = 2, UNDO = 3;
 
     @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        outState.putParcelableArray("players", players);
+        outState.putInt("iter", iter);
+        outState.putInt("select_method", selectMethod);
+        outState.putSerializable("factions", factionAdapter.getAllItems());
+        super.onSaveInstanceState(outState);
+    }
+
+    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Bundle extras = getIntent().getExtras();
-        selectMethod = extras.getInt("method_id", -1);
-        players = new Player[ extras.getInt("players", -1) ];
-        for(int i=0; i<players.length; i++)
-            players[i] = new Player(
-                    String.format("Player %d", i+1),
-                    extras.getInt("mulligans1", 0),
-                    extras.getInt("mulligans2", 0)
-            );
 
-        ArrayList<String> factions = getIntent().getStringArrayListExtra("factions");
+        ArrayList<String> factions;
+
+        if(savedInstanceState!=null) {
+            Parcelable[] pp = savedInstanceState.getParcelableArray("players");
+            players = new Player[pp.length];
+            for(int i=0; i<pp.length; i++)
+                players[i] = (Player) pp[i];
+
+            iter = savedInstanceState.getInt("iter");
+            iter--; //cause it will be incremented when next() is called at the end of onCreate;
+            selectMethod = savedInstanceState.getInt("select_method");
+
+            factions = savedInstanceState.getStringArrayList("factions");
+        } else {
+            Bundle extras = getIntent().getExtras();
+            selectMethod = extras.getInt("method_id", -1);
+            players = new Player[extras.getInt("players", -1)];
+            for (int i = 0; i < players.length; i++)
+                players[i] = new Player(
+                        String.format("Player %d", i + 1),
+                        extras.getInt("mulligans1", 0),
+                        extras.getInt("mulligans2", 0)
+                );
+
+            factions = getIntent().getStringArrayListExtra("factions");
+        }
+
         Collections.sort(factions);
-        factionAdapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, factions);
+        factionAdapter = new FactionAdapter(this, android.R.layout.simple_list_item_1, factions);
         pickListview = new ListView(this);
         pickListview.setAdapter(factionAdapter);
         pickListview.addHeaderView(otherPick = new TextView(this));
@@ -63,7 +94,6 @@ public class Selecting extends AppCompatActivity {
                 selectFaction((TextView) view);
             }
         });
-
         next();
     }
 
@@ -174,10 +204,23 @@ public class Selecting extends AppCompatActivity {
     View.OnClickListener drawRandom = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
-            String faction = factionAdapter.getItem(randomGenerator.nextInt(factionAdapter.getCount()));
+            final Player player = players[iter % players.length];
+            String faction;
+            int sanity = 0; //TODO: Probably a better way to do this
+            do {
+                faction = factionAdapter.getItem(randomGenerator.nextInt(factionAdapter.getCount()));
+                sanity += 1;
+            }  while(player.pastMulligans.contains(faction) &&
+                    sanity < (factionAdapter.getCount() + player.pastMulligans.size()*2)
+                    );
+            if(player.pastMulligans.contains(faction)) {
+                Toast.makeText(Selecting.this, "Ran out of options that have not already been mulligan'd", Toast.LENGTH_SHORT).show();
+                player.pastMulligans.clear();
+            }
+
             ((TextView)findViewById(R.id.faction)).setText(faction);
             ((Button)findViewById(R.id.draw)).setText("Accept");
-            int mulliganCt = players[iter % players.length].mulligans[iter / players.length];
+            int mulliganCt = player.mulligans[iter / players.length];
             if(mulliganCt==0) {
                 findViewById(R.id.use_mulligan).setVisibility(View.GONE);
             } else {
@@ -189,7 +232,8 @@ public class Selecting extends AppCompatActivity {
             findViewById(R.id.use_mulligan).setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    players[iter % players.length].mulligans[iter / players.length]--;
+                    player.mulligans[iter / players.length]--;
+                    player.pastMulligans.add(((TextView)findViewById(R.id.faction)).getText().toString());
                     drawRandom.onClick(v);
                 }
             });
@@ -229,44 +273,17 @@ public class Selecting extends AppCompatActivity {
         finish();
     }
 
-    public static class Player implements Parcelable {
-        String name;
-        String[] factions = new String[2];
-        int[] mulligans;
 
-        public Player(String n, int m1, int m2) {
-            name = n;
-            mulligans = new int[] {m1, m2};
+    class FactionAdapter extends ArrayAdapter<String> {
+        private ArrayList<String> factions;
+
+        public FactionAdapter(Context context, int resource, ArrayList<String> objects) {
+            super(context, resource, objects);
+            factions = objects;
         }
 
-        protected Player(Parcel in) {
-            name = in.readString();
-            factions = in.createStringArray();
-            mulligans = in.createIntArray();
+        public ArrayList<String> getAllItems() {
+            return factions;
         }
-
-        @Override
-        public int describeContents() {
-            return 0;
-        }
-
-        @Override
-        public void writeToParcel(Parcel dest, int flags) {
-            dest.writeString(name);
-            dest.writeStringArray(factions);
-            dest.writeIntArray(mulligans);
-        }
-
-        public static Creator<Player> CREATOR = new Creator<Player>() {
-            @Override
-            public Player createFromParcel(Parcel in) {
-                return new Player(in);
-            }
-
-            @Override
-            public Player[] newArray(int size) {
-                return new Player[size];
-            }
-        };
     }
 }

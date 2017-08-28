@@ -1,4 +1,4 @@
-package com.qweex.smashuphelper;
+package com.qweex.smashuphelper.activities;
 
 import android.content.Context;
 import android.os.Bundle;
@@ -11,28 +11,38 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.qweex.smashuphelper.objects.Player;
+
 
 public class Summary extends AppCompatActivity{
-    Selecting.Player[] players;
+    Player[] players;
     ListView listView;
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        outState.putParcelableArray("players", players);
+        super.onSaveInstanceState(outState);
+    }
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        Parcelable[] pp = getIntent().<Selecting.Player>getParcelableArrayExtra("players");
-        players = new Selecting.Player[pp.length];
+        Parcelable[] pp = savedInstanceState!=null ?
+                savedInstanceState.getParcelableArray("players") :
+                getIntent().<Player>getParcelableArrayExtra("players");
+        players = new Player[pp.length];
         for(int i=0; i<pp.length; i++)
-            players[i] = (Selecting.Player) pp[i];
+            players[i] = (Player) pp[i];
 
         setContentView(listView = new ListView(this));
         listView.setAdapter(new SummaryAdapter(this, android.R.layout.simple_list_item_2, players));
     }
 
-    class SummaryAdapter extends ArrayAdapter<Selecting.Player> {
-        Selecting.Player[] players;
+    class SummaryAdapter extends ArrayAdapter<Player> {
+        Player[] players;
 
-        public SummaryAdapter(Context context, int resource, Selecting.Player[] players) {
+        public SummaryAdapter(Context context, int resource, Player[] players) {
             super(context, resource, android.R.id.text1, players);
             this.players = players;
         }

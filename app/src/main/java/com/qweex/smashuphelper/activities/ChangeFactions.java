@@ -1,4 +1,4 @@
-package com.qweex.smashuphelper;
+package com.qweex.smashuphelper.activities;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -9,6 +9,10 @@ import android.view.ViewGroup;
 import android.widget.BaseExpandableListAdapter;
 import android.widget.CheckBox;
 import android.widget.ExpandableListView;
+
+import com.qweex.smashuphelper.objects.Expansion;
+import com.qweex.smashuphelper.objects.Faction;
+import com.qweex.smashuphelper.R;
 
 import java.util.ArrayList;
 

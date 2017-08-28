@@ -1,4 +1,4 @@
-package com.qweex.smashuphelper;
+package com.qweex.smashuphelper.objects;
 
 import android.os.Parcel;
 import android.os.Parcelable;
