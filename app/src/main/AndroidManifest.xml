@@ -19,5 +19,5 @@
         <activity android:name=".ChangeFactions" />
         <activity android:name=".Summary" />
     </application>
-
+    <uses-permission android:name="android.permission.INTERNET" />
 </manifest>
