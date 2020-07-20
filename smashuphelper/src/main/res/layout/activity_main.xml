@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context="com.qweex.smashuphelper.MainActivity">
+    tools:context="com.qweex.activities.smashuphelper.MainActivity">
 
     <ScrollView
         android:layout_width="match_parent"
@@ -80,6 +80,7 @@
                 android:layout_below="@+id/mulligansText"
                 android:layout_centerHorizontal="true"
                 android:gravity="center_horizontal"
+                android:imeOptions="flagNoExtractUi"
                 android:text="0" />
 
             <EditText
@@ -91,6 +92,7 @@
                 android:layout_below="@+id/mulligans1"
                 android:layout_centerHorizontal="true"
                 android:gravity="center_horizontal"
+                android:imeOptions="flagNoExtractUi"
                 android:text="0" />
 
             <RadioGroup
@@ -98,8 +100,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="26dp"
                 android:layout_below="@+id/mulligans2"
-                android:id="@+id/method_group"
-                android:layout_above="@+id/go">
+                android:id="@+id/method_group">
 
                 <RadioButton
                     android:layout_width="wrap_content"
