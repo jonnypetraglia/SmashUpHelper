@@ -3,8 +3,8 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/SmashUpHelper.iml" filepath="$PROJECT_DIR$/SmashUpHelper.iml" group="SmashUpHelper" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/app/SmashUpHelper-app.iml" filepath="$PROJECT_DIR$/.idea/modules/app/SmashUpHelper-app.iml" group="SmashUpHelper/app" />
-      <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
+      <module fileurl="file://$PROJECT_DIR$/smashuphelper/app.iml" filepath="$PROJECT_DIR$/smashuphelper/app.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/smashuphelper/smashuphelper.iml" filepath="$PROJECT_DIR$/.idea/modules/smashuphelper/smashuphelper.iml" group="SmashUpHelper/smashuphelper" />
     </modules>
   </component>
 </project>
